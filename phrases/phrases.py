@@ -14,5 +14,5 @@ class Exercise_Frame(tk.Frame):
         self.create_widgets()
     
     def create_widgets(self):
-        name_label = tk.Label(self, text=EXERCISE_NAME, font=('Arial 16 bold'), bg=self.bg)
-        name_label.pack(fill=tk.X, side=tk.TOP)
+        name_label = tk.Label(self, text=EXERCISE_NAME, font=('Arial 24 bold'), bg=self.bg)
+        name_label.pack(fill=tk.X, side=tk.TOP, pady=20)
