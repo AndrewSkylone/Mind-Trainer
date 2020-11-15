@@ -1,6 +1,7 @@
 import tkinter as tk
 import os
 import random
+import copy
 
 
 EXERCISE_NAME = 'Слова'
@@ -13,7 +14,10 @@ class Exercise_Frame(tk.Frame):
         self.bg = kw['bg']
         self.configure(bg=self.bg)
 
-        self.words = self.read_words_from_file(file_name='words.txt')
+        self.word_var = tk.StringVar()
+        self.backup_words = self.read_words_from_file(file_name='words.txt')
+        self.words = copy.deepcopy(self.backup_words)
+        self.learned_words = []
 
         self.create_widgets()
 
@@ -27,18 +31,29 @@ class Exercise_Frame(tk.Frame):
         exercise_frame = tk.Frame(self, bg=self.bg)
         exercise_frame.pack(fill=tk.Y, pady=20)
 
-        self.word_entry = tk.Entry(exercise_frame, font='Arial 20 bold', bd=0, width=40, justify='center')
-        self.word_entry.textvariable = tk.StringVar()
-        self.word_entry.configure(textvariable=self.word_entry.textvariable)
+        self.word_entry = tk.Entry(exercise_frame, font='Arial 20 bold', bd=0, width=30, textvariable=self.word_var, justify='center')
         self.word_entry.grid(row=0, columnspan=3, pady=20)
+        self.word_entry.bind('<Return>', lambda e: self.check_word(word=self.word_var.get()))
 
         self.count_label = tk.Label(exercise_frame, bg=self.bg, font='Arial 20 bold')
         self.count_label.grid(row=1, column=1)
 
         next_buton = tk.Button(exercise_frame, text='следующее', font=('Arial 16'), bg='#9cffe0', command=self.next_world)
-        next_buton.grid(row=1, column=0, padx=5)
+        next_buton.grid(row=1, column=0, sticky='w')
         start_training_buton = tk.Button(exercise_frame, text='тренировка', font=('Arial 16'), bg='#9cffe0', command=self.start_training)
-        start_training_buton.grid(row=1, column=2, padx=5)
+        start_training_buton.grid(row=1, column=2, sticky='e')
+
+        self.text_area = tk.Text(exercise_frame, width=20, height=20)
+        self.text_area.grid(row=2, columnspan=3, pady=10, sticky='swen')
+
+    def check_word(self, word):
+        for w in self.words:
+            learning_word = w.split('(')[0]
+            if word == learning_word:
+                self.words.remove(w)
+                self.count_label['text'] = len(self.words)
+                self.word_var.set('')
+                self.text_area.insert(tk.END, w + '\t\t')
 
     def next_world(self):
         if len(self.words) == 0:
@@ -46,13 +61,21 @@ class Exercise_Frame(tk.Frame):
             return
 
         word = random.choice(self.words)
-        self.word_entry.textvariable.set(word)
+        self.word_var.set(word)
         self.word_entry.configure(bg=self.bg)
         self.words.remove(word)
         self.count_label['text'] = len(self.words)
 
+        self.master.focus()
+
     def start_training(self):
-        pass
+        self.word_var.set('')
+        self.word_entry.configure(bg='white')
+        self.text_area.delete(1.0, tk.END)
+
+        self.words = copy.deepcopy(self.backup_words)
+        self.count_label['text'] = len(self.words)
+        self.word_entry.focus()
     
     def read_words_from_file(self, file_name):
         words = []
