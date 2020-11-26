@@ -2,7 +2,7 @@ import tkinter as tk
 import os
 import random
 import copy
-
+from tkinter import filedialog
 
 EXERCISE_NAME = 'Слова'
 
@@ -15,9 +15,10 @@ class Exercise_Frame(tk.Frame):
         self.configure(bg=self.bg)
 
         self.word_var = tk.StringVar()
-        self.backup_words = self.read_words_from_file(file_name='words.txt')
+        file_path = filedialog.askopenfilename(initialdir=os.path.dirname(__file__),
+                                                title="Select file", filetypes=(("txt files", "*.txt"), ))
+        self.backup_words = self.read_words_from_file(file_name=file_path)
         self.words = copy.deepcopy(self.backup_words)
-        self.learned_words = []
 
         self.create_widgets()
 
@@ -49,11 +50,20 @@ class Exercise_Frame(tk.Frame):
     def check_word(self, word):
         for w in self.words:
             learning_word = w.split('(')[0]
-            if word == learning_word:
+            if self.get_strings_match_percent(word, learning_word) > 70:
                 self.words.remove(w)
                 self.count_label['text'] = len(self.words)
                 self.word_var.set('')
-                self.text_area.insert(tk.END, w + '\t\t')
+                self.text_area.insert(tk.END, w + ', ')
+
+    def get_strings_match_percent(self, string1, string2) -> int:
+        str1_chars = set(string1.lower())
+        str2_chars = set(string2.lower())
+
+        union_str = str1_chars | str2_chars
+        difference_str = str1_chars & str2_chars
+        
+        return int(len(difference_str) / len(union_str) * 100)
 
     def next_world(self):
         if len(self.words) == 0:
