@@ -57,13 +57,17 @@ class Exercise_Frame(tk.Frame):
                 self.text_area.insert(tk.END, w + ', ')
 
     def get_strings_match_percent(self, string1, string2) -> int:
-        str1_chars = set(string1.lower())
-        str2_chars = set(string2.lower())
-
-        union_str = str1_chars | str2_chars
-        difference_str = str1_chars & str2_chars
+        string1 = string1.lower()
+        string2 = string2.lower()        
+        shorter_word = string1 if len(string1) <= len(string2) else string2
+        longer_word = string2 if len(string2) >= len(string1) else string1
         
-        return int(len(difference_str) / len(union_str) * 100)
+        difference_str = list(longer_word)
+        for char in shorter_word:
+            if char in difference_str:
+                difference_str.remove(char)
+        
+        return 100 - int(len(difference_str) / len(string2) * 100)
 
     def next_world(self):
         if len(self.words) == 0:
