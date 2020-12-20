@@ -28,23 +28,30 @@ class MainFrame(tk.Frame):
             ex_button.configure(command=lambda lib=lib: self.create_exercise(exercise_lib=lib))
             ex_button.grid(row=index, pady=10, sticky='swen')
             
-    def create_exercise(self, exercise_lib):
+    def __create_exercise(self, exercise_lib):
         self.pack_forget()
 
         reload(exercise_lib)
         self.exercise_frame = exercise_lib.Exercise_Frame(self.master, bg=exercises_libs[exercise_lib])
         self.exercise_frame.pack(fill=tk.BOTH, expand=True)
 
-        panel_frame.configure(bg=exercises_libs[exercise_lib])
+    def create_exercise(self, exercise_lib):
+        self.pack_forget()
 
-    def display(self):
+        import exercise
+        reload(exercise)
+        self.exercise_frame = exercise.Exercise_Frame(self.master, main_menu=self, bg=exercises_libs[exercise_lib])
+        self.exercise_frame.pack(fill=tk.BOTH, expand=True)
+
+    def display_main_menu(self):
         if hasattr(self, 'exercise_frame'):
             self.exercise_frame.destroy()
             del(self.exercise_frame)
 
-            panel_frame.configure(bg=BACKGROUNG)
-
         self.pack(fill=tk.BOTH, expand=True)
+    
+    def exit(self):
+        sys.exit()
 
 if __name__ == "__main__":
     
@@ -59,22 +66,8 @@ if __name__ == "__main__":
     root.resizable(False, False)
     root.title('Brain Trainer')
 
-    #exercises frame
-    exercises_frame = tk.Frame(root)
-    exercises_frame.pack(fill=tk.BOTH, expand=True)
-
-    main_frame = MainFrame(exercises_frame, bg=BACKGROUNG)
-    main_frame.display()
-
-    #panel frame
-    panel_frame = tk.Frame(root, bg=BACKGROUNG)
-    panel_frame.pack(fill=tk.BOTH)
-
-    menu_button = tk.Button(panel_frame, text='главное меню', font=('Arial 16'), bg='#e8e68b', command=main_frame.display)
-    menu_button.pack(side=tk.LEFT)
-
-    quit_button = tk.Button(panel_frame, text='выход', font=('Arial 16'), bg='#e8e68b', command=sys.exit)
-    quit_button.pack(side=tk.RIGHT)
+    main_frame = MainFrame(root, bg=BACKGROUNG)
+    main_frame.display_main_menu()
 
     root.mainloop()
     

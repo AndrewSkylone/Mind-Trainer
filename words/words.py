@@ -4,6 +4,7 @@ import random
 import copy
 from tkinter import filedialog
 
+
 EXERCISE_NAME = 'Слова'
 
 class Exercise_Frame(tk.Frame):
@@ -15,9 +16,10 @@ class Exercise_Frame(tk.Frame):
         self.configure(bg=self.bg)
 
         self.word_var = tk.StringVar()
+        self.word_var.trace('w', lambda *args: self.set_right_or_wrong_font())
         file_path = filedialog.askopenfilename(initialdir=os.path.dirname(__file__),
                                                 title="Select file", filetypes=(("txt files", "*.txt"), ))
-        self.backup_words = self.read_words_from_file(file_name=file_path)
+        self.backup_words = self.read_file(file_name=file_path)
         self.words = copy.deepcopy(self.backup_words)
 
         self.create_widgets()
@@ -44,7 +46,7 @@ class Exercise_Frame(tk.Frame):
         start_training_buton = tk.Button(exercise_frame, text='тренировка', font=('Arial 16'), bg='#9cffe0', command=self.start_training)
         start_training_buton.grid(row=1, column=2, sticky='e')
 
-        self.text_area = tk.Text(exercise_frame, width=20, height=20)
+        self.text_area = tk.Text(exercise_frame, width=20, height=15, font=('Arial 14'))
         self.text_area.grid(row=2, columnspan=3, pady=10, sticky='swen')
 
     def check_word(self, word):
@@ -57,10 +59,10 @@ class Exercise_Frame(tk.Frame):
                 self.text_area.insert(tk.END, w + ', ')
 
     def get_strings_match_percent(self, string1, string2) -> int:
-        string1 = string1.lower()
-        string2 = string2.lower()        
-        shorter_word = string1 if len(string1) <= len(string2) else string2
-        longer_word = string2 if len(string2) >= len(string1) else string1
+        s1 = string1.lower()
+        s2 = string2.lower()        
+        shorter_word = s1 if len(s1) <= len(s2) else s2
+        longer_word = s2 if len(s2) >= len(s1) else s1
         
         difference_str = list(longer_word)
         for char in shorter_word:
@@ -91,7 +93,7 @@ class Exercise_Frame(tk.Frame):
         self.count_label['text'] = len(self.words)
         self.word_entry.focus()
     
-    def read_words_from_file(self, file_name):
+    def read_file(self, file_name):
         words = []
         folder = os.path.dirname(__file__)
         with open(os.path.join(folder, file_name), encoding='utf-8') as f:
@@ -99,3 +101,11 @@ class Exercise_Frame(tk.Frame):
             words = [word.strip() for word in words]
 
         return words
+
+    def set_right_or_wrong_font(self):
+        for word in self.words:
+            if self.word_var.get() in word:
+                self.word_entry.config(fg='black')
+                return
+        
+        self.word_entry.config(fg='red')
