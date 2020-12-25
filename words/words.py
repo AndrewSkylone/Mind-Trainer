@@ -94,7 +94,6 @@ class Exercise_Frame(tk.Frame):
         self.word_entry.focus()
     
     def read_file(self, file_name):
-        words = []
         folder = os.path.dirname(__file__)
         with open(os.path.join(folder, file_name), encoding='utf-8') as f:
             words = f.read().split(',')

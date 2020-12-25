@@ -7,7 +7,8 @@ from phrases import phrases
 from dialogs import dialogs
 
 
-exercises_libs = {words : "#ffc9c9", phrases : '#e0ffff', dialogs : '#e1ffe0'}
+# exercises_libs = {words : "#ffc9c9", phrases : '#e0ffff', dialogs : '#e1ffe0'}
+exercises_libs = {phrases : '#e0ffff'}
 BACKGROUNG = '#fff3d1'
 
 class MainFrame(tk.Frame):
@@ -23,19 +24,19 @@ class MainFrame(tk.Frame):
         menu_frame.configure(bg=BACKGROUNG)
 
         for index, lib in enumerate(exercises_libs.keys()):
-            ex_button = tk.Button(menu_frame, text=lib.EXERCISE_NAME, width=20)
+            ex_button = tk.Button(menu_frame, text=lib.Exercise.name, width=20)
             ex_button.configure(font=('Arial 16'), bg=exercises_libs[lib])
             ex_button.configure(command=lambda lib=lib: self.create_exercise(exercise_lib=lib))
             ex_button.grid(row=index, pady=10, sticky='swen')
             
-    def __create_exercise(self, exercise_lib):
+    def create_exercise(self, exercise_lib):
         self.pack_forget()
 
         reload(exercise_lib)
-        self.exercise_frame = exercise_lib.Exercise_Frame(self.master, bg=exercises_libs[exercise_lib])
+        self.exercise_frame = exercise_lib.Exercise(self.master, main_menu=self, bg=exercises_libs[exercise_lib])
         self.exercise_frame.pack(fill=tk.BOTH, expand=True)
 
-    def create_exercise(self, exercise_lib):
+    def __create_exercise(self, exercise_lib):
         self.pack_forget()
 
         import exercise

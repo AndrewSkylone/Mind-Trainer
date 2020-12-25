@@ -1,18 +1,49 @@
 import tkinter as tk
+from tkinter import filedialog
+from importlib import reload
+import os
+import random
+
+import exercise
+reload(exercise)
 
 
-EXERCISE_NAME = 'Фразы'
+class Exercise(exercise.Exercise_Frame):
+    name = 'Фразы'
 
-class Exercise_Frame(tk.Frame):
-    def __init__(self, master, cnf={}, **kw):
-        tk.Frame.__init__(self, master, cnf, **kw)
+    def __init__(self, master, main_menu, cnf={}, **kw):
+        exercise.Exercise_Frame.__init__(self, master, main_menu, cnf, **kw)
 
-        self.master = master
-        self.bg = kw['bg']
-        self.configure(bg=self.bg)
+    def get_phrases_from_file(self) -> list:
+        file_path = filedialog.askopenfilename(initialdir=os.path.dirname(__file__),
+                                                title="Select file", filetypes=(("txt files", "*.txt"), ))
+        folder = os.path.dirname(__file__)
 
-        self.create_widgets()
+        with open(os.path.join(folder, file_path), encoding='utf-8') as f:
+            phrases = f.read().split('\n')
+        return phrases
     
-    def create_widgets(self):
-        name_label = tk.Label(self, text=EXERCISE_NAME, font=('Arial 24 bold'), bg=self.bg)
-        name_label.pack(fill=tk.X, side=tk.TOP, pady=20)
+    def insert_phrase_in_text_area(self, phrase):
+        raise NotImplementedError
+    
+    def start_training(self):
+        raise NotImplementedError
+    
+    def check_phrase(self, phrase):
+        raise NotImplementedError
+    
+    def next_phrase(self):
+        if len(self.unlearned_phrases) == 0:
+            self.start_training()
+            return
+
+        phrase = random.choice(self.unlearned_phrases)
+        self.unlearned_phrases.remove(phrase)
+        self.learned_phrases.append(phrase)
+
+        self.display_var.set(phrase)
+
+        self.update_counts()
+
+        self.master.focus()
+    

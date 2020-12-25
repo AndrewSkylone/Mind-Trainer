@@ -1,39 +1,39 @@
 import tkinter as tk
-from tkinter import filedialog
 import copy
-import os
 
 
 class Exercise_Frame(tk.Frame):
+    name = 'Exercise'
+    
     def __init__(self, master, main_menu, cnf={}, **kw):
         tk.Frame.__init__(self, master, cnf, **kw)
 
         self.main_menu = main_menu
         self.bg = kw['bg']
         self.configure(bg=self.bg)
-        self.name = 'Exercise'
-        self.display_var = tk.StringVar()
+        self.display_text = tk.StringVar()
         self.write_entry = None
+        self.learned_count_label = None
+        self.unlearned_count_label = None
 
-        # file_path = filedialog.askopenfilename(initialdir=os.path.dirname(__file__),
-        #                                         title="Select file", filetypes=(("txt files", "*.txt"), ))
-        # self.phrases_backup = self.get_phrases_from_file(file_name=file_path)
-        # self.phrases = copy.deepcopy(self.phrases_backup)
+        self.phrases_backup = self.get_phrases_from_file()
+        self.unlearned_phrases = copy.deepcopy(self.phrases_backup)
+        self.learned_phrases = []
 
         self.create_widgets()
 
-        # self.next_phrase()
+        self.next_phrase()
     
     def create_widgets(self):
-        name_label = tk.Label(self, text=self.name, font=('Arial 24 bold'), bg=self.bg)
+        name_label = tk.Label(self, text=self.__class__.name, font=('Arial 24 bold'), bg=self.bg)
         name_label.pack(fill=tk.X, side=tk.TOP, pady=10)
 
         #exercise frame
         exercise_frame = tk.Frame(self, bg=self.bg)
         exercise_frame.pack(fill=tk.Y, pady=20)
 
-        display_label = tk.Label(exercise_frame, font='Arial 14 bold', bg=self.bg, bd=0, width=30, textvariable=self.display_var, justify='center')
-        display_label.grid(row=0, columnspan=4)
+        display_label = tk.Label(exercise_frame, font='Arial 11 bold', bg=self.bg, bd=0, width=30, textvariable=self.display_var, justify='center')
+        display_label.grid(row=0, columnspan=4, sticky='w' + 'e')
 
         self.write_entry = tk.Entry(exercise_frame, font='Arial 14 bold', bd=0, width=50, justify='center')
         self.write_entry.grid(row=1, columnspan=4, pady=10, sticky='w' + 'e')
@@ -73,6 +73,14 @@ class Exercise_Frame(tk.Frame):
         
         return 100 - int(len(difference_str) / len(string2) * 100)
 
+    def update_counts(self):
+        self.unlearned_count_label['text'] = len(self.unlearned_phrases)
+        self.learned_count_label['text'] = len(self.learned_phrases)
+
+            
+    def insert_phrase_in_text_area(self, phrase):
+        raise NotImplementedError
+    
     def start_training(self):
         raise NotImplementedError
     
@@ -82,5 +90,5 @@ class Exercise_Frame(tk.Frame):
     def next_phrase(self):
         raise NotImplementedError
     
-    def get_phrases_from_file(self, file_name):
+    def get_phrases_from_file(self):
         raise NotImplementedError
