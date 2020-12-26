@@ -16,6 +16,8 @@ class MainFrame(tk.Frame):
         tk.Frame.__init__(self, master, cnf, **kw)
 
         self.master = master
+        self.exercise_frame = None
+
         self.create_widgets()
     
     def create_widgets(self):
@@ -44,21 +46,28 @@ class MainFrame(tk.Frame):
         self.exercise_frame = exercise.Exercise_Frame(self.master, main_menu=self, bg=exercises_libs[exercise_lib])
         self.exercise_frame.pack(fill=tk.BOTH, expand=True)
 
-    def display_main_menu(self):
+    def __display_main_menu(self):
         if hasattr(self, 'exercise_frame'):
             self.exercise_frame.destroy()
             del(self.exercise_frame)
 
         self.pack(fill=tk.BOTH, expand=True)
+    def display_main_menu(self):
+        if self.exercise_frame:
+            self.exercise_frame.destroy()
+
+        self.pack(fill=tk.BOTH, expand=True)
     
     def exit(self):
+        print(len(self.exercise_frame.unlearned_phrases))
+        print(len(self.exercise_frame.right_phrases))
         sys.exit()
 
 if __name__ == "__main__":
     
     root = tk.Tk()
 
-    height = 600
+    height = 650
     width = 700
     screen_w = root.winfo_screenwidth()
     screen_h = root.winfo_screenheight()

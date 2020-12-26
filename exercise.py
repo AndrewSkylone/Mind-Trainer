@@ -1,6 +1,9 @@
 import tkinter as tk
 import copy
+import random
 
+
+MAX_WIDGET_WIDTH = 75
 
 class Exercise_Frame(tk.Frame):
     name = 'Exercise'
@@ -11,7 +14,9 @@ class Exercise_Frame(tk.Frame):
         self.main_menu = main_menu
         self.bg = kw['bg']
         self.configure(bg=self.bg)
-        self.display_text = tk.StringVar()
+
+        #widgets
+        self.display_text = None
         self.write_entry = None
         self.learned_count_label = None
         self.unlearned_count_label = None
@@ -19,6 +24,7 @@ class Exercise_Frame(tk.Frame):
         self.phrases_backup = self.get_phrases_from_file()
         self.unlearned_phrases = copy.deepcopy(self.phrases_backup)
         self.learned_phrases = []
+        self.right_phrases = []
 
         self.create_widgets()
 
@@ -30,14 +36,15 @@ class Exercise_Frame(tk.Frame):
 
         #exercise frame
         exercise_frame = tk.Frame(self, bg=self.bg)
-        exercise_frame.pack(fill=tk.Y, pady=20)
+        exercise_frame.pack(fill=tk.Y, pady=10)
 
-        display_label = tk.Label(exercise_frame, font='Arial 11 bold', bg=self.bg, bd=0, width=30, textvariable=self.display_var, justify='center')
-        display_label.grid(row=0, columnspan=4, sticky='w' + 'e')
+        self.display_text = tk.Text(exercise_frame, font='Arial 12 bold', bg=self.bg, bd=0, width=MAX_WIDGET_WIDTH, height=3, state='disabled')
+        self.display_text.grid(row=0, columnspan=4, sticky='w' + 'e')
+        self.display_text.tag_configure("center", justify='center')
 
-        self.write_entry = tk.Entry(exercise_frame, font='Arial 14 bold', bd=0, width=50, justify='center')
+        self.write_entry = tk.Entry(exercise_frame, font='Arial 12 bold', bd=0, width=50, justify='center')
         self.write_entry.grid(row=1, columnspan=4, pady=10, sticky='w' + 'e')
-        self.write_entry.bind('<Return>', lambda e: self.check_phrase(phrase=self.write_entry.get()))
+        self.write_entry.bind('<Return>', lambda e: self.check_entered_phrase())
         self.write_entry.bind('<Button-3>', lambda e: self.write_entry.delete(0, tk.END))
 
         next_buton = tk.Button(exercise_frame, text='следующее', font=('Arial 16'), bg='#9cffe0', command=self.next_phrase)
@@ -51,14 +58,14 @@ class Exercise_Frame(tk.Frame):
         start_training_buton = tk.Button(exercise_frame, text='тренировка', font=('Arial 16'), bg='#9cffe0', command=self.start_training)
         start_training_buton.grid(row=2, column=3, sticky='e')
 
-        self.text_area = tk.Text(exercise_frame, width=20, height=15, font=('Arial 14'))
-        self.text_area.grid(row=3, columnspan=4, pady=10, sticky='swen')
+        self.learned_text = tk.Text(exercise_frame, width=20, height=15, font=('Arial 12'), state='disabled')
+        self.learned_text.grid(row=3, columnspan=4, pady=10, sticky='swen')
 
         menu_button = tk.Button(self, text='главное меню', font=('Arial 16'), bg='#e8e68b', command=self.main_menu.display_main_menu)
-        menu_button.pack(side=tk.LEFT)
+        menu_button.pack(side=tk.LEFT, padx=10)
 
         quit_button = tk.Button(self, text='выход', font=('Arial 16'), bg='#e8e68b', command=self.main_menu.exit)
-        quit_button.pack(side=tk.RIGHT)
+        quit_button.pack(side=tk.RIGHT, padx=10)
     
     def get_strings_match_percent(self, string1, string2) -> int:
         s1 = string1.lower()
@@ -76,19 +83,68 @@ class Exercise_Frame(tk.Frame):
     def update_counts(self):
         self.unlearned_count_label['text'] = len(self.unlearned_phrases)
         self.learned_count_label['text'] = len(self.learned_phrases)
-
             
-    def insert_phrase_in_text_area(self, phrase):
-        raise NotImplementedError
+    def insert_display_text(self, text:str):
+        self.display_text.config(state='normal')
+        self.display_text.delete(1.0, tk.END)
+        self.display_text.insert(1.0, text, 'center')
+        self.display_text.config(state='disabled')
     
+    def insert_learned_text(self, text):
+        self.learned_text.config(state='normal')
+        self.learned_text.insert(tk.END, text + '\n')
+        self.learned_text.config(state='disabled')
+    
+    def cut_phrase(self, phrase) -> (str, str):
+        """ return half phrase or dialog without last phrase """        
+
+        dialog = phrase.split('-')
+        if len(dialog) > 1:
+            part1 = "-".join(dialog[:-1])
+            part2 = dialog[-1]
+            return part1, part2
+        else:
+            phrase = phrase.split(' ')
+            part1 = ' '.join(phrase[:len(phrase)//2])
+            part2 = ' '.join(phrase[len(phrase)//2:])
+            return part1, part2
+
+    def get_full_displayed_phrase(self) -> str:
+        displayed_phrase = self.display_text.get(1.0, tk.END).rstrip() #remove '\n'
+
+        for i in range(len(self.learned_phrases)):
+            if displayed_phrase in self.learned_phrases[i]:
+                return self.learned_phrases[i]
+        
+        return displayed_phrase
+
+    def phrase_is_right(self, phrase):
+        self.write_entry.delete(0, tk.END)
+        self.insert_display_text(text='')
+        self.insert_learned_text(text=phrase)
+        self.learned_phrases.remove(phrase)
+        self.right_phrases.append(phrase)
+        self.update_counts()    
+    
+    def next_phrase(self):       
+        if len(self.unlearned_phrases) == 0:
+            self.start_training()
+            return
+
+        phrase = random.choice(self.unlearned_phrases)
+        self.unlearned_phrases.remove(phrase)
+        self.learned_phrases.append(phrase)
+
+        self.insert_display_text(text=phrase)
+        self.update_counts()
+        self.master.focus()
+
     def start_training(self):
         raise NotImplementedError
     
-    def check_phrase(self, phrase):
-        raise NotImplementedError
-    
-    def next_phrase(self):
+    def check_entered_phrase(self):
         raise NotImplementedError
     
     def get_phrases_from_file(self):
         raise NotImplementedError
+    

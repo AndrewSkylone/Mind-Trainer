@@ -1,8 +1,8 @@
 import tkinter as tk
 from tkinter import filedialog
 from importlib import reload
-import os
 import random
+import os
 
 import exercise
 reload(exercise)
@@ -27,23 +27,16 @@ class Exercise(exercise.Exercise_Frame):
         raise NotImplementedError
     
     def start_training(self):
-        raise NotImplementedError
+        phrase = random.choice(self.learned_phrases)
+        display_phrase = self.cut_phrase(phrase)[0]
+
+        self.insert_display_text(text=display_phrase)
     
-    def check_phrase(self, phrase):
-        raise NotImplementedError
-    
-    def next_phrase(self):
-        if len(self.unlearned_phrases) == 0:
-            self.start_training()
-            return
+    def check_entered_phrase(self):
+        entered_phrase = self.write_entry.get()
+        full_training_phrase = self.get_full_displayed_phrase()
+        training_phrase = self.cut_phrase(phrase=full_training_phrase)[1]
 
-        phrase = random.choice(self.unlearned_phrases)
-        self.unlearned_phrases.remove(phrase)
-        self.learned_phrases.append(phrase)
-
-        self.display_var.set(phrase)
-
-        self.update_counts()
-
-        self.master.focus()
+        if self.get_strings_match_percent(entered_phrase, training_phrase) > 70:
+            self.phrase_is_right(phrase=full_training_phrase)
     
