@@ -1,14 +1,16 @@
 import tkinter as tk
 from importlib import reload
 import sys
+import os
+import atexit
 
 from words import words
 from phrases import phrases
 from dialogs import dialogs
 
 
-# exercises_libs = {words : "#ffc9c9", phrases : '#e0ffff', dialogs : '#e1ffe0'}
-exercises_libs = {phrases : '#e0ffff'}
+exercises_libs = {words : "#ffc9c9", phrases : '#e0ffff', dialogs : '#e1ffe0'}
+# exercises_libs = {phrases : '#e0ffff', dialogs : '#e1ffe0'}
 BACKGROUNG = '#fff3d1'
 
 class MainFrame(tk.Frame):
@@ -38,20 +40,6 @@ class MainFrame(tk.Frame):
         self.exercise_frame = exercise_lib.Exercise(self.master, main_menu=self, bg=exercises_libs[exercise_lib])
         self.exercise_frame.pack(fill=tk.BOTH, expand=True)
 
-    def __create_exercise(self, exercise_lib):
-        self.pack_forget()
-
-        import exercise
-        reload(exercise)
-        self.exercise_frame = exercise.Exercise_Frame(self.master, main_menu=self, bg=exercises_libs[exercise_lib])
-        self.exercise_frame.pack(fill=tk.BOTH, expand=True)
-
-    def __display_main_menu(self):
-        if hasattr(self, 'exercise_frame'):
-            self.exercise_frame.destroy()
-            del(self.exercise_frame)
-
-        self.pack(fill=tk.BOTH, expand=True)
     def display_main_menu(self):
         if self.exercise_frame:
             self.exercise_frame.destroy()
@@ -59,8 +47,13 @@ class MainFrame(tk.Frame):
         self.pack(fill=tk.BOTH, expand=True)
     
     def exit(self):
-        print(len(self.exercise_frame.unlearned_phrases))
-        print(len(self.exercise_frame.right_phrases))
+        os.chdir(os.path.join(sys.path[0], 'Unlearned phrases'))
+        filename = os.path.basename(self.exercise_frame.file_path)
+        with open(fr'{filename}', 'w', encoding='utf-8') as f:
+            phrases = self.exercise_frame.unlearned_phrases + self.exercise_frame.learned_phrases
+            for phrase in phrases:
+                f.write(phrase + "\n")
+
         sys.exit()
 
 if __name__ == "__main__":
@@ -78,6 +71,8 @@ if __name__ == "__main__":
 
     main_frame = MainFrame(root, bg=BACKGROUNG)
     main_frame.display_main_menu()
+
+    atexit.register(main_frame.exit)
 
     root.mainloop()
     

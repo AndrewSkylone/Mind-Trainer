@@ -95,19 +95,6 @@ class Exercise_Frame(tk.Frame):
         self.learned_text.insert(tk.END, text + '\n')
         self.learned_text.config(state='disabled')
     
-    def cut_phrase(self, phrase) -> (str, str):
-        """ return half phrase or dialog without last phrase """        
-
-        dialog = phrase.split('-')
-        if len(dialog) > 1:
-            part1 = "-".join(dialog[:-1])
-            part2 = dialog[-1]
-            return part1, part2
-        else:
-            phrase = phrase.split(' ')
-            part1 = ' '.join(phrase[:len(phrase)//2])
-            part2 = ' '.join(phrase[len(phrase)//2:])
-            return part1, part2
 
     def get_full_displayed_phrase(self) -> str:
         displayed_phrase = self.display_text.get(1.0, tk.END).rstrip() #remove '\n'
@@ -132,19 +119,23 @@ class Exercise_Frame(tk.Frame):
             return
 
         phrase = random.choice(self.unlearned_phrases)
+        
         self.unlearned_phrases.remove(phrase)
         self.learned_phrases.append(phrase)
 
         self.insert_display_text(text=phrase)
         self.update_counts()
         self.master.focus()
+    
+    def check_entered_phrase(self):
+        raise NotImplementedError
 
     def start_training(self):
         raise NotImplementedError
     
-    def check_entered_phrase(self):
+    def cut_phrase(self, phrase) -> (str, str):
         raise NotImplementedError
-    
+
     def get_phrases_from_file(self):
         raise NotImplementedError
     
