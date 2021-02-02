@@ -3,6 +3,7 @@ from tkinter import filedialog
 from importlib import reload
 import random
 import os
+from datetime import datetime
 
 import exercise
 reload(exercise)
@@ -16,6 +17,9 @@ class Exercise(exercise.Exercise_Frame):
                                                 title="Select file", filetypes=(("txt files", "*.txt"), ))
                                                 
         exercise.Exercise_Frame.__init__(self, master, main_menu, cnf, **kw)
+
+        self.time = 5 #time for entering phrase
+        self.timer.set_time(datetime(year=2020, month=10, day=1, hour=0, minute=0, second=self.time))
 
         self.word_var = tk.StringVar()
         self.word_var.trace('w', lambda *args: self.set_right_or_wrong_font())
@@ -32,7 +36,7 @@ class Exercise(exercise.Exercise_Frame):
 
         return phrases
     
-    def start_training(self):
+    def get_tip(self):
         phrase = random.choice(self.learned_phrases)
         display_phrase = self.cut_phrase(phrase)[1]
 
@@ -72,105 +76,3 @@ class Exercise(exercise.Exercise_Frame):
                 return
         
         self.write_entry.config(fg='red')
-
-class Exercise_Frame(tk.Frame):
-    def __init__(self, master, cnf={}, **kw):
-        tk.Frame.__init__(self, master, cnf, **kw)
-
-        self.master = master
-        self.bg = kw['bg']
-        self.configure(bg=self.bg)
-
-        self.word_var = tk.StringVar()
-        self.word_var.trace('w', lambda *args: self.set_right_or_wrong_font())
-        file_path = filedialog.askopenfilename(initialdir=os.path.dirname(__file__),
-                                                title="Select file", filetypes=(("txt files", "*.txt"), ))
-        self.backup_words = self.read_file(file_name=file_path)
-        self.words = copy.deepcopy(self.backup_words)
-
-        self.create_widgets()
-
-        self.next_world()
-    
-    def create_widgets(self):
-        name_label = tk.Label(self, text=EXERCISE_NAME, font=('Arial 24 bold'), bg=self.bg)
-        name_label.pack(fill=tk.X, side=tk.TOP, pady=10)
-
-        #exercise frame
-        exercise_frame = tk.Frame(self, bg=self.bg)
-        exercise_frame.pack(fill=tk.Y, pady=20)
-
-        self.word_entry = tk.Entry(exercise_frame, font='Arial 20 bold', bd=0, width=30, textvariable=self.word_var, justify='center')
-        self.word_entry.grid(row=0, columnspan=3, pady=20)
-        self.word_entry.bind('<Return>', lambda e: self.check_word(word=self.word_var.get()))
-
-        self.count_label = tk.Label(exercise_frame, bg=self.bg, font='Arial 20 bold')
-        self.count_label.grid(row=1, column=1)
-
-        next_buton = tk.Button(exercise_frame, text='следующее', font=('Arial 16'), bg='#9cffe0', command=self.next_world)
-        next_buton.grid(row=1, column=0, sticky='w')
-        start_training_buton = tk.Button(exercise_frame, text='тренировка', font=('Arial 16'), bg='#9cffe0', command=self.start_training)
-        start_training_buton.grid(row=1, column=2, sticky='e')
-
-        self.text_area = tk.Text(exercise_frame, width=20, height=15, font=('Arial 14'))
-        self.text_area.grid(row=2, columnspan=3, pady=10, sticky='swen')
-
-    def check_word(self, word):
-        for w in self.words:
-            learning_word = w.split('(')[0]
-            if self.get_strings_match_percent(word, learning_word) > 70:
-                self.words.remove(w)
-                self.count_label['text'] = len(self.words)
-                self.word_var.set('')
-                self.text_area.insert(tk.END, w + ', ')
-
-    def get_strings_match_percent(self, string1, string2) -> int:
-        s1 = string1.lower()
-        s2 = string2.lower()        
-        shorter_word = s1 if len(s1) <= len(s2) else s2
-        longer_word = s2 if len(s2) >= len(s1) else s1
-        
-        difference_str = list(longer_word)
-        for char in shorter_word:
-            if char in difference_str:
-                difference_str.remove(char)
-        
-        return 100 - int(len(difference_str) / len(string2) * 100)
-
-    def next_world(self):
-        if len(self.words) == 0:
-            self.start_training()
-            return
-
-        word = random.choice(self.words)
-        self.word_var.set(word)
-        self.word_entry.configure(bg=self.bg)
-        self.words.remove(word)
-        self.count_label['text'] = len(self.words)
-
-        self.master.focus()
-
-    def start_training(self):
-        self.word_var.set('')
-        self.word_entry.configure(bg='white')
-        self.text_area.delete(1.0, tk.END)
-
-        self.words = copy.deepcopy(self.backup_words)
-        self.count_label['text'] = len(self.words)
-        self.word_entry.focus()
-    
-    def read_file(self, file_name):
-        folder = os.path.dirname(__file__)
-        with open(os.path.join(folder, file_name), encoding='utf-8') as f:
-            words = f.read().split(',')
-            words = [word.strip() for word in words]
-
-        return words
-
-    def set_right_or_wrong_font(self):
-        for word in self.words:
-            if self.word_var.get() in word:
-                self.word_entry.config(fg='black')
-                return
-        
-        self.word_entry.config(fg='red')

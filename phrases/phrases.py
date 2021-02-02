@@ -3,6 +3,7 @@ from tkinter import filedialog
 from importlib import reload
 import random
 import os
+from datetime import datetime
 
 import exercise
 reload(exercise)
@@ -17,6 +18,7 @@ class Exercise(exercise.Exercise_Frame):
                                                 
         exercise.Exercise_Frame.__init__(self, master, main_menu, cnf, **kw)
 
+        self.time = 10 #time for entering phrase
 
     def get_phrases_from_file(self) -> list:
         folder = os.path.dirname(__file__)
@@ -26,7 +28,7 @@ class Exercise(exercise.Exercise_Frame):
             phrases = [phrase for phrase in phrases if " - " not in phrase]
         return phrases
     
-    def start_training(self):
+    def get_tip(self):
         phrase = random.choice(self.learned_phrases)
         display_phrase = self.cut_phrase(phrase)[0]
 
