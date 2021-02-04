@@ -18,9 +18,6 @@ class Exercise(exercise.Exercise_Frame):
                                                 
         exercise.Exercise_Frame.__init__(self, master, main_menu, cnf, **kw)
 
-        self.time = 5 #time for entering phrase
-        self.timer.set_time(datetime(year=2020, month=10, day=1, hour=0, minute=0, second=self.time))
-
         self.word_var = tk.StringVar()
         self.word_var.trace('w', lambda *args: self.set_right_or_wrong_font())
         self.write_entry.config(textvariable=self.word_var)
@@ -29,18 +26,10 @@ class Exercise(exercise.Exercise_Frame):
         folder = os.path.dirname(__file__)
 
         with open(os.path.join(folder, self.file_path), encoding='utf-8') as f:
-            phrases = f.read().split(',')
-            if len(phrases) == 1:
-                f.seek(0)                
-                phrases = f.read().split('\n')
+            text = f.read()
+            phrases = text.split(', ') if len(text.split(', ')) > len(text.split('\n')) else text.split('\n')
 
         return phrases
-    
-    def get_tip(self):
-        phrase = random.choice(self.learned_phrases)
-        display_phrase = self.cut_phrase(phrase)[1]
-
-        self.insert_display_text(text=display_phrase)
 
     def check_entered_phrase(self):
         entered_phrase = self.write_entry.get()

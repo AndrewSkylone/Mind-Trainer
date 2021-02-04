@@ -10,7 +10,6 @@ from dialogs import dialogs
 
 
 exercises_libs = {words : "#ffc9c9", phrases : '#e0ffff', dialogs : '#e1ffe0'}
-# exercises_libs = {phrases : '#e0ffff', dialogs : '#e1ffe0'}
 BACKGROUNG = '#fff3d1'
 
 class MainFrame(tk.Frame):
@@ -47,10 +46,18 @@ class MainFrame(tk.Frame):
         self.pack(fill=tk.BOTH, expand=True)
     
     def exit(self):
-        os.chdir(os.path.join(sys.path[0], 'Unlearned phrases'))
+        work_dir = sys.path[0]
         filename = os.path.basename(self.exercise_frame.file_path)
-        with open(fr'{filename}', 'w', encoding='utf-8') as f:
+
+        os.chdir(os.path.join(work_dir, 'Unlearned phrases'))
+        with open(filename, 'w', encoding='utf-8') as f:
             phrases = self.exercise_frame.unlearned_phrases + self.exercise_frame.learned_phrases
+            for phrase in phrases:
+                f.write(phrase + "\n")
+
+        os.chdir(os.path.join(work_dir, 'Learned phrases'))
+        with open(filename, 'w', encoding='utf-8') as f:
+            phrases = self.exercise_frame.right_phrases
             for phrase in phrases:
                 f.write(phrase + "\n")
 

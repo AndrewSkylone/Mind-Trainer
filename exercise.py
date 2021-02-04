@@ -18,8 +18,6 @@ class Exercise_Frame(tk.Frame):
         self.bg = kw['bg']
         self.configure(bg=self.bg)
 
-        self.time = 0 #time for entering phrase
-
         #widgets
         self.timer = None
         self.display_text = None
@@ -77,8 +75,21 @@ class Exercise_Frame(tk.Frame):
         menu_button = tk.Button(self, text='главное меню', font=('Arial 16'), bg='#e8e68b', command=self.main_menu.display_main_menu)
         menu_button.pack(side=tk.LEFT, padx=10)
 
+        restart_button = tk.Button(self, text='рестарт', font=('Arial 16'), bg='#e8e68b', command=self.restart_exercise)
+        restart_button.pack(side=tk.LEFT, padx=5)
+
         quit_button = tk.Button(self, text='выход', font=('Arial 16'), bg='#e8e68b', command=self.main_menu.exit)
         quit_button.pack(side=tk.RIGHT, padx=10)
+    
+    def restart_exercise(self):
+        self.unlearned_phrases = copy.deepcopy(self.phrases_backup)
+        self.learned_phrases.clear()
+        self.right_phrases.clear()
+        self.update_counts()
+
+        self.learned_text.config(state='normal')
+        self.learned_text.delete(0.0, tk.END)
+        self.learned_text.config(state='disabled')
     
     def get_strings_match_percent(self, string1, string2) -> int:
         s1 = string1.lower()
@@ -124,7 +135,7 @@ class Exercise_Frame(tk.Frame):
         self.learned_phrases.remove(phrase)
         self.right_phrases.append(phrase)
         self.update_counts()
-        self.timer.set_time(time=self.timer.get_time() + timedelta(seconds=self.time))
+        self.timer.set_time(time=self.timer.get_time() + timedelta(seconds=self.timer.start_time.second))
     
     def next_phrase(self):       
         if len(self.unlearned_phrases) == 0:
@@ -146,11 +157,17 @@ class Exercise_Frame(tk.Frame):
             self.learned_phrases.clear()
             self.update_counts()
 
-    def check_entered_phrase(self):
-        raise NotImplementedError
-
     def get_tip(self):
-        raise NotImplementedError
+        phrases_with_tip = []
+        
+        for phrase in self.learned_phrases:
+            if self.cut_phrase(phrase)[1]:
+                phrases_with_tip.append(phrase)
+        
+        if phrases_with_tip:
+            phrase = random.choice(phrases_with_tip)
+            display_phrase = self.cut_phrase(phrase)[1]
+            self.insert_display_text(text=display_phrase)
 
     def move_phrases(self):
         if len(self.unlearned_phrases) > 0:
@@ -161,6 +178,9 @@ class Exercise_Frame(tk.Frame):
             self.learned_phrases.clear()
         self.update_counts()
     
+    def check_entered_phrase(self):
+        raise NotImplementedError
+
     def cut_phrase(self, phrase) -> (str, str):
         raise NotImplementedError
 

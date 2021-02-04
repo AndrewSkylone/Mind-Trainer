@@ -28,12 +28,6 @@ class Exercise(exercise.Exercise_Frame):
             phrases = [phrase for phrase in phrases if " - " not in phrase]
         return phrases
     
-    def get_tip(self):
-        phrase = random.choice(self.learned_phrases)
-        display_phrase = self.cut_phrase(phrase)[0]
-
-        self.insert_display_text(text=display_phrase)
-
     def check_entered_phrase(self):
         entered_phrase = self.write_entry.get()
 
@@ -51,6 +45,6 @@ class Exercise(exercise.Exercise_Frame):
     
     def cut_phrase(self, phrase) -> (str, str):
         phrase = phrase.split(' ')
-        part1 = ' '.join(phrase[:len(phrase)//2])
-        part2 = ' '.join(phrase[len(phrase)//2:])
+        part1 = ' '.join(phrase[len(phrase)//2:])
+        part2 = ' '.join(phrase[:len(phrase)//2])
         return part1, part2

@@ -35,13 +35,7 @@ class Exercise(exercise.Exercise_Frame):
             part2 = dialog[-1]
             return part1, part2
         else:
-            return phrase
-
-    def get_tip(self):
-        phrase = random.choice(self.learned_phrases)
-        display_phrase = self.cut_phrase(phrase)[0]
-
-        self.insert_display_text(text=display_phrase)
+            return phrase, ''
     
     def check_entered_phrase(self):
         entered_phrase = self.write_entry.get()
