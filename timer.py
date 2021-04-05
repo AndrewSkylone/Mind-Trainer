@@ -12,7 +12,7 @@ class Timer_GUI(tk.Frame):
 
         self.timer_var = tk.StringVar()
         self.end_function = end_fuction
-        self.is_timer_started = False
+        self.is_timer_work = False
         self.start_time = datetime(year=2020, month=10, day=1, hour=0, minute=0, second=0)
 
         self.create_widgets()
@@ -34,10 +34,10 @@ class Timer_GUI(tk.Frame):
         return dateutil.parser.parse(self.timer_var.get())
     
     def start_timer(self):
-        if self.is_timer_started:
+        if self.is_timer_work:
             return
 
-        self.is_timer_started = True
+        self.is_timer_work = True
         self.start_time = self.get_time()
         self.count_time()
 
@@ -51,7 +51,7 @@ class Timer_GUI(tk.Frame):
             self.after(1000, lambda: self.count_time())
 
     def end_timer(self):
-        self.is_timer_started = False
+        self.is_timer_work = False
         winsound.Beep(2500, 750)
         self.set_time(time=self.start_time)
 

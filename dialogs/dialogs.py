@@ -31,8 +31,8 @@ class Exercise(exercise.Exercise_Frame):
     def cut_phrase(self, phrase) -> (str, str):
         dialog = phrase.split(' - ')
         if len(dialog) > 1:
-            part1 = " - ".join(dialog[:-1])
-            part2 = dialog[-1]
+            part1 = dialog[-1]
+            part2 = " - ".join(dialog[:-1])
             return part1, part2
         else:
             return phrase, ''

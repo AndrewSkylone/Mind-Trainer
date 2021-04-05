@@ -18,6 +18,8 @@ class Exercise_Frame(tk.Frame):
         self.bg = kw['bg']
         self.configure(bg=self.bg)
 
+        self.current_phrase = ''
+        
         #widgets
         self.timer = None
         self.display_text = None
@@ -46,11 +48,11 @@ class Exercise_Frame(tk.Frame):
         exercise_frame.pack(fill=tk.Y, pady=10)
 
         self.display_text = tk.Text(exercise_frame, font='Arial 12 bold', bg=self.bg, bd=0, width=MAX_WIDGET_WIDTH, height=3, state='disabled')
-        self.display_text.grid(row=0, columnspan=5, sticky='w' + 'e')
+        self.display_text.grid(row=0, columnspan=6, sticky='w' + 'e')
         self.display_text.tag_configure("center", justify='center')
 
         self.write_entry = tk.Entry(exercise_frame, font='Arial 12 bold', bd=0, width=50, justify='center')
-        self.write_entry.grid(row=1, columnspan=5, pady=10, sticky='w' + 'e')
+        self.write_entry.grid(row=1, columnspan=6, pady=10, sticky='w' + 'e')
         self.write_entry.bind('<Return>', lambda e: self.check_entered_phrase())
         self.write_entry.bind('<Button-3>', lambda e: self.write_entry.delete(0, tk.END))
 
@@ -63,20 +65,23 @@ class Exercise_Frame(tk.Frame):
         tip_button = tk.Button(exercise_frame, text='подсказка', font=('Arial 16'), bg='#9cffe0', command=self.get_tip)
         tip_button.grid(row=2, column=2, sticky='we')
 
+        show_button = tk.Button(exercise_frame, text='показать', font=('Arial 16'), bg='#9cffe0', command=self.show_phrase)
+        show_button.grid(row=2, column=3, padx=5, sticky='we')
+
         self.unlearned_count_label = tk.Label(exercise_frame, bg=self.bg, font='Arial 18 bold')
-        self.unlearned_count_label.grid(row=2, column=3, sticky='e')
+        self.unlearned_count_label.grid(row=2, column=4, sticky='e')
 
         move_buton = tk.Button(exercise_frame, text='перенос', font=('Arial 16'), bg='#9cffe0', command=self.move_phrases)
-        move_buton.grid(row=2, column=4, sticky='e')
+        move_buton.grid(row=2, column=5, sticky='e')
 
         self.learned_text = tk.Text(exercise_frame, width=20, height=15, font=('Arial 12'), state='disabled')
-        self.learned_text.grid(row=3, columnspan=5, pady=10, sticky='swen')
+        self.learned_text.grid(row=3, columnspan=6, pady=10, sticky='swen')
 
         menu_button = tk.Button(self, text='главное меню', font=('Arial 16'), bg='#e8e68b', command=self.main_menu.display_main_menu)
-        menu_button.pack(side=tk.LEFT, padx=10)
+        menu_button.pack(side=tk.LEFT, padx=5)
 
         restart_button = tk.Button(self, text='рестарт', font=('Arial 16'), bg='#e8e68b', command=self.restart_exercise)
-        restart_button.pack(side=tk.LEFT, padx=5)
+        restart_button.pack(side=tk.LEFT)
 
         quit_button = tk.Button(self, text='выход', font=('Arial 16'), bg='#e8e68b', command=self.main_menu.exit)
         quit_button.pack(side=tk.RIGHT, padx=10)
@@ -118,15 +123,6 @@ class Exercise_Frame(tk.Frame):
         self.learned_text.config(state='normal')
         self.learned_text.insert(tk.END, text + '\n')
         self.learned_text.config(state='disabled')
-    
-    def get_full_displayed_phrase(self) -> str:
-        displayed_phrase = self.display_text.get(1.0, tk.END).rstrip() #remove '\n'
-
-        for i in range(len(self.learned_phrases)):
-            if displayed_phrase in self.learned_phrases[i]:
-                return self.learned_phrases[i]
-        
-        return displayed_phrase
 
     def phrase_is_right(self, phrase):
         self.write_entry.delete(0, tk.END)
@@ -142,12 +138,12 @@ class Exercise_Frame(tk.Frame):
             self.move_phrases()
             return
 
-        phrase = random.choice(self.unlearned_phrases)
+        self.current_phrase = random.choice(self.unlearned_phrases)
         
-        self.unlearned_phrases.remove(phrase)
-        self.learned_phrases.append(phrase)
+        self.unlearned_phrases.remove(self.current_phrase)
+        self.learned_phrases.append(self.current_phrase)
 
-        self.insert_display_text(text=phrase)
+        self.insert_display_text(text=self.current_phrase)
         self.update_counts()
         self.master.focus()
     
@@ -157,6 +153,9 @@ class Exercise_Frame(tk.Frame):
             self.learned_phrases.clear()
             self.update_counts()
 
+    def show_phrase(self):
+        self.insert_display_text(self.current_phrase)
+    
     def get_tip(self):
         phrases_with_tip = []
         
@@ -165,8 +164,8 @@ class Exercise_Frame(tk.Frame):
                 phrases_with_tip.append(phrase)
         
         if phrases_with_tip:
-            phrase = random.choice(phrases_with_tip)
-            display_phrase = self.cut_phrase(phrase)[1]
+            self.current_phrase = random.choice(phrases_with_tip)
+            display_phrase = self.cut_phrase(self.current_phrase)[1]
             self.insert_display_text(text=display_phrase)
 
     def move_phrases(self):
